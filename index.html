@@ -6,16 +6,32 @@
 		<style>
 			@import url(http://fonts.googleapis.com/css?family=Lobster);
 
+			* {
+				margin: 0;
+				padding: 0;
+				line-height: 1;
+			}
+
 			body {
 				background: #E8FFFA url(bg.png);
+				font-family: Arial;
 			}
 
 			h1 {
 				font-family: 'Lobster', cursive;
-				font-size: 36px;
-				text-shadow: 0 1px 0px black;
+				font-size: 48px;
+				text-shadow: 0 3px 0px rgba(0, 0, 0, 0.25);
 				text-align: center;
 				color: #FE729D;
+				padding: 20px;
+			}
+
+			h1 span {
+				color: #AD98FE;
+			}
+
+			a {
+				text-decoration: none;
 			}
 
 			#dropbox {
@@ -24,7 +40,7 @@
 				margin: 0 auto;
 				border: solid 1px #CCC;
 				border-bottom: none;
-				background: #E9FF5C;
+				background: #F0FF8F;
 				border-radius: 10px;
 				box-shadow: 0 0px 30px rgba(0, 0, 0, 0.25), 0px 0px -10px #000, inset 0 0 12px rgba(0, 0, 0, 0.25);
 				margin-bottom: 30px;
@@ -33,14 +49,14 @@
 			#dropbox span {
 				display: block;
 				font-family: 'Lobster', cursive;
-				color: #FE729D;
+				color: #C6D94E;
 				font-size: 24px;
 				text-align: center;
 				line-height: 200px;
-				text-shadow: 0 1px 0 #000;
+				text-shadow: 0 1px 0 #97A63C, 0 2px 0 #97A63C;
 			}
 
-			#output {
+			#console {
 				background: #28201B;
 				color: #FFFFE5;
 				padding: 10px;
@@ -50,27 +66,54 @@
 				margin-bottom: 10px;
 				width: 700px;
 				margin: 0 auto;
+				margin-bottom: 20px;
 				word-wrap: break-word;
+				line-height: 1.2em;
 			}
 
-			a {
-				text-decoration: none;
+			#output {
+				text-align: center;
 			}
 
 			.download {	
-				margin-top: 10px;
+				position: fixed;
+				bottom: 0;
+				right: 0;
+				margin: 20px;
 				font-family: 'Lobster', cursive;			
 				background: #FE729D;
 				font-weight: bold;
 				color: #FFF;
 				text-shadow: 0 1px 0 rgba(0, 0, 0, 0.75);
-				padding: 5px 10px;
+				padding: 10px;
 				border-radius: 10px;
 				box-shadow: 0 0 10px rgba(0, 0, 0, 0.5), inset -2px -2px 5px rgba(0, 0, 0, 0.125);
 				display: inline-block;
 			}
 
 			img.output { display: block; }
+
+			footer {
+				position: fixed;
+				bottom: 0;
+				left: 0;
+				background: rgba(0, 0, 0, 0.5);
+				padding: 10px;
+				color: #FFF;
+				box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+				border-radius: 0 10px 0 0;
+				font-size: 14px;
+			}
+
+			footer a { 
+				color: #FFF; 
+				font-style: italic;
+				font-weight: bold;
+			}
+
+			footer a:hover {
+				text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+			}
 		</style>	
 
 		<script>
@@ -79,7 +122,7 @@
 
 			var file;
 
-			var outputElement;
+			var dropboxElement, consoleElement, outputElement;
 
 			var worker;
 		
@@ -91,12 +134,12 @@
 					var message = event.data;
 
 					if(message.type == "stdout") {
-						outputElement.innerHTML += message.line + '\n';
+						consoleElement.innerHTML += message.line + '\n';
 					} else if(message.type == "done") {
 						var imageElement = getImage(message.data);
 
 						imageElement.className = 'output';
-						document.body.appendChild(imageElement);					
+						outputElement.appendChild(imageElement);					
 
 						//
 						var downloadLinkElement = document.createElement('a');
@@ -132,8 +175,9 @@
                         };
 
 			window.onload = function() {
-				var dropboxElement = document.getElementById("dropbox");
-
+				//
+				dropboxElement = document.getElementById("dropbox");
+				consoleElement = document.getElementById("console");
 				outputElement = document.getElementById("output");
 			
 				initWorker();
@@ -184,7 +228,7 @@
 						});
 
 						//
-						outputElement.style.display = 'block';					
+						consoleElement.innerHTML = '';					
 
 						//
 						worker.postMessage({
@@ -205,8 +249,18 @@
 		</script>
 	</head>
 	<body>
-		<h1>PNG Crush</h1>
+		<header>	
+			<h1>PNG<span>Crush</span></h1>
+		</header>
+
+		<a href="http://github.com/richardassar"><img style="position: fixed; top: 0; right: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/7afbc8b248c68eb468279e8c17986ad46549fb71/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub"></a>
+
 		<div id="dropbox"><span>Drop a PNG here</span></div>
-		<pre id="output" style="display: none;"></pre>
+		<pre id="console">Waiting ...</pre>
+		<div id="output"></div>
+
+		<footer>
+			<p>Designed and developed by <a href="mailto:richardassar@googlemail.com">@richardassar</a> | Powered by <a href="">Emscripten</a>, <a href="">libpng</a> and <a href="">zlib</a></p>
+		</footer>
 	</body>
 </html>
