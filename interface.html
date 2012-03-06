@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>PNG Crush</title>
+		
+		<style>
+			@import url(http://fonts.googleapis.com/css?family=Lobster);
+
+			body {
+				background: #E8FFFA;
+			}
+
+			h1 {
+				font-family: 'Lobster', cursive;
+				font-size: 36px;
+				text-shadow: 0 1px 0px black;
+				text-align: center;
+				color: #FE729D;
+			}
+
+			#dropbox {
+				width: 320px;
+				height: 200px;
+				border: solid 1px #CCC;
+				border-bottom: none;
+				background: #E5FF3B;
+				border-radius: 10px;
+				box-shadow: 0 0 10px rgba(0, 0, 0, 0.3), inset -2px -2px 5px rgba(0, 0, 0, 0.125);
+			}	
+
+			#dropbox span {
+				display: block;
+				font-family: 'Lobster', cursive;
+				color: #FE729D;
+				font-size: 24px;
+				text-align: center;
+				line-height: 200px;
+				text-shadow: 0 1px 0 #000;
+			}
+
+			#output {
+				background: #28201B;
+				color: #FFF;
+				padding: 10px;
+				border-radius: 10px;
+				box-shadow: 0 0 10px rgba(0, 0, 0, 0.3), inset -2px -2px 5px rgba(0, 0, 0, 0.125);
+				margin-bottom: 10px;
+			}
+
+			a {
+				text-decoration: none;
+			}
+
+			.download {	
+				margin-top: 10px;
+				font-family: 'Lobster', cursive;			
+				background: #FE729D;
+				font-weight: bold;
+				color: #FFF;
+				text-shadow: 0 1px 0 rgba(0, 0, 0, 0.75);
+				padding: 5px 10px;
+				border-radius: 10px;
+				box-shadow: 0 0 10px rgba(0, 0, 0, 0.5), inset -2px -2px 5px rgba(0, 0, 0, 0.125);
+				display: inline-block;
+			}
+
+			img.output { display: block; }
+		</style>	
+
+		<script>
+			BlobBuilder = window.MozBlobBuilder || window.WebKitBlobBuilder || window.BlobBuilder;
+			window.URL = window.URL || window.webkitURL;
+
+			var file;
+
+			var outputElement;
+
+			var worker;
+		
+			function initWorker() {
+				worker = new Worker("worker.js");
+
+				worker.onmessage = function(event) {					
+					console.log(event);
+					var message = event.data;
+
+					if(message.type == "stdout") {
+						outputElement.innerHTML += message.line + '\n';
+					} else if(message.type == "done") {
+						var imageElement = getImage(message.data);
+
+						imageElement.className = 'output';
+						document.body.appendChild(imageElement);					
+
+						//
+						var downloadLinkElement = document.createElement('a');
+
+						downloadLinkElement.className = 'download';
+						downloadLinkElement.download = file.fileName;
+						downloadLinkElement.href = imageElement.src;
+						downloadLinkElement.innerHTML = 'Download';
+
+						document.body.appendChild(downloadLinkElement);
+					}
+				};
+			};
+
+                        function getImage(fileData) {
+				//
+				var blobBuilder = new BlobBuilder();
+
+				blobBuilder.append(fileData);		
+
+				//
+				var blob = blobBuilder.getBlob('image/png');
+
+				//
+				var src = window.URL.createObjectURL(blob);
+				
+				//
+				var imageElement = document.createElement('img');
+
+				imageElement.src = src;
+
+                                return imageElement;
+                        };
+
+			window.onload = function() {
+				var dropboxElement = document.getElementById("dropbox");
+
+				outputElement = document.getElementById("output");
+			
+				initWorker();
+
+				//
+				function noopHandler(event) {
+					event.stopPropagation();
+					event.preventDefault();
+				};
+
+				dropboxElement.addEventListener("dragenter", noopHandler, false);
+				dropboxElement.addEventListener("dragexit", noopHandler, false);
+
+				dropboxElement.addEventListener("dragover", function(event) {
+					event.stopPropagation();
+					event.preventDefault();
+
+					event.dataTransfer.dropEffect = 'copy';
+				}, false);
+
+				dropboxElement.addEventListener("drop", function(event) {
+					event.stopPropagation();
+					event.preventDefault();
+
+					var files = event.dataTransfer.files;		
+
+					file = files[0];
+
+					var fileReader = new FileReader();
+
+					fileReader.addEventListener('error', function(event) {
+						console.log(event);
+					}, false);
+
+					fileReader.addEventListener('progress', function(event) {
+						console.log(event);
+					}, false);
+
+					fileReader.addEventListener('loadend', function(event) {						
+						//
+						var arrayBuffer = event.target.result;
+
+						var data = new Uint8Array(arrayBuffer);
+
+						worker.postMessage({
+							'type' : 'file',
+							'data' : data
+						});
+
+						//
+						outputElement.style.display = 'block';					
+
+						//
+						worker.postMessage({
+							'type' : 'command',
+							'command' : 'go'							
+						});
+					}, false);
+
+					fileReader.readAsArrayBuffer(file);//readAsBinaryString(file);				
+				}, false);
+			};
+		</script>
+	</head>
+	<body>
+		<h1>PNG Crush</h1>
+		<div id="dropbox"><span>Drop a PNG here</span></div>
+		<pre id="output" style="display: none;"></pre>
+	</body>
+</html>
