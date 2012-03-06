@@ -146,7 +146,6 @@
 				worker = new Worker("worker.js");
 
 				worker.onmessage = function(event) {					
-					console.log(event);
 					var message = event.data;
 
 					if(message.type == "stdout") {
