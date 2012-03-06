@@ -38,7 +38,7 @@ onmessage = function(event) {
 
 		case "command":
 			if(message.command == "go") {				
-				Module.run(['-reduce', 'input.png', 'output.png']);			
+				Module.run(['-reduce', '-rem', 'alla', '-rem', 'text', 'input.png', 'output.png']);			
 
 				postMessage({
 					'type' : 'done',
