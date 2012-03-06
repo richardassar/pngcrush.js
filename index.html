@@ -159,15 +159,15 @@
 
 					var fileReader = new FileReader();
 
-					fileReader.addEventListener('error', function(event) {
+					/*fileReader.addEventListener('error', function(event) {
 						console.log(event);
 					}, false);
 
 					fileReader.addEventListener('progress', function(event) {
 						console.log(event);
-					}, false);
+					}, false);*/
 
-					fileReader.addEventListener('loadend', function(event) {						
+					function onloadend(event) {
 						//
 						var arrayBuffer = event.target.result;
 
@@ -186,7 +186,13 @@
 							'type' : 'command',
 							'command' : 'go'							
 						});
-					}, false);
+					};
+
+					if(fileReader.addEventListener) {
+						fileReader.addEventListener('loadend', onloadend, false);
+					} else {
+						fileReader.onloadend = onloadend;
+					}
 
 					fileReader.readAsArrayBuffer(file);//readAsBinaryString(file);				
 				}, false);
