@@ -23,7 +23,7 @@
 				text-shadow: 0 3px 0px rgba(0, 0, 0, 0.25);
 				text-align: center;
 				color: #FE729D;
-				padding: 20px;
+				padding: 30px;
 			}
 
 			h1 span {
@@ -66,13 +66,28 @@
 				margin-bottom: 10px;
 				width: 700px;
 				margin: 0 auto;
-				margin-bottom: 20px;
+				margin-bottom: 30px;
 				word-wrap: break-word;
 				line-height: 1.2em;
 			}
 
 			#output {
+				margin: 0 auto;
 				text-align: center;
+				background: url(checkerboard.jpg);
+				width: 250px;
+				height: 250px;
+				border-radius: 10px;
+			}
+
+			#output .inner {
+				display: table-cell;
+				vertical-align: middle;
+			}
+
+			#output img {
+				max-width: 250px;
+				max-height: 250px;
 			}
 
 			.download {	
@@ -90,8 +105,6 @@
 				box-shadow: 0 0 10px rgba(0, 0, 0, 0.5), inset -2px -2px 5px rgba(0, 0, 0, 0.125);
 				display: inline-block;
 			}
-
-			img.output { display: block; }
 
 			footer {
 				position: fixed;
@@ -138,7 +151,6 @@
 					} else if(message.type == "done") {
 						var imageElement = getImage(message.data);
 
-						imageElement.className = 'output';
 						outputElement.appendChild(imageElement);					
 
 						//
@@ -178,7 +190,7 @@
 				//
 				dropboxElement = document.getElementById("dropbox");
 				consoleElement = document.getElementById("console");
-				outputElement = document.getElementById("output");
+				outputElement = document.getElementById("output").children[0];
 			
 				initWorker();
 
@@ -249,18 +261,14 @@
 		</script>
 	</head>
 	<body>
-		<header>	
-			<h1>PNG<span>Crush</span></h1>
-		</header>
+		<header><h1>PNG<span>Crush</span></h1></header>
 
 		<a href="http://github.com/richardassar"><img style="position: fixed; top: 0; right: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/7afbc8b248c68eb468279e8c17986ad46549fb71/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub"></a>
 
 		<div id="dropbox"><span>Drop a PNG here</span></div>
 		<pre id="console">Waiting ...</pre>
-		<div id="output"></div>
+		<div id="output"><div class="inner"></div></div>
 
-		<footer>
-			<p>Designed and developed by <a href="mailto:richardassar@googlemail.com">@richardassar</a> | Powered by <a href="">Emscripten</a>, <a href="">libpng</a> and <a href="">zlib</a></p>
-		</footer>
+		<footer><p>Designed and developed by <a href="mailto:richardassar@googlemail.com">@richardassar</a> | Powered by <a href="https://github.com/kripken/emscripten">Emscripten</a>, <a href="http://www.libpng.org/pub/png/libpng.html">libpng</a> and <a href="http://zlib.net/">zlib</a></p></footer>
 	</body>
 </html>
