@@ -1,1 +1,281 @@
-My GitHub Page
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>PNG Crush</title>
+		
+		<style>
+			@import url(http://fonts.googleapis.com/css?family=Lobster);
+
+			* {
+				margin: 0;
+				padding: 0;
+				line-height: 1;
+			}
+
+			body {
+				background: #FFF url(bg.png) repeat-x;
+				font-family: Arial;
+			}
+
+			h1 {
+				font-family: 'Lobster', cursive;
+				font-size: 48px;
+				text-shadow: 1px 1px 0px #BF305C, 1px 2px 0px #BF305C, 2px 3px 0px #BF305C, 2px 4px 0px #BF305C, 3px 5px 0px #80203D, 3px 5px 5px #80203D;
+				text-align: center;
+				color: #FE729D;
+				padding: 30px;
+			}
+
+			h1 span {
+				color: #AD98FE;
+				text-shadow: 1px 1px 0px #7360BF, 1px 2px 0px #7360BF, 2px 3px 0px #7360BF, 2px 4px 0px #7360BF, 3px 5px 0px #55468C, 3px 5px 5px #55468C;
+			}
+
+			a {
+				text-decoration: none;
+			}
+
+			#dropbox {
+				width: 320px;
+				height: 200px;
+				margin: 0 auto;
+				border: solid 1px #CCC;
+				border-bottom: none;
+				background: #FFFCCB;
+				filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FFFCCB', endColorstr='#FFFF5E');
+				background: -webkit-gradient(linear, left top, left bottom, from(#FFFCCB), to(#FFFF5E));
+				background: -moz-linear-gradient(top, #FFFCCB, #FFFF5E);
+				border-radius: 10px;
+				box-shadow: 0 3px 2px rgba(0, 0, 0, 0.5), 0px 0px -10px #000, inset 0 0 12px rgba(0, 0, 0, 0.25);
+				margin-bottom: 30px;
+			}	
+
+			#dropbox span {
+				display: block;
+				font-family: 'Lobster', cursive;
+				color: #858507;
+				font-size: 24px;
+				text-align: center;
+				line-height: 200px;
+				text-shadow: 1px 1px 0 #F0FF8F, 2px 2px 2px rgba(0, 0, 0, 0.5);
+				font-size: 38px;
+			}
+
+			#console {
+				background: #301D10;
+				color: #FFFFE5;
+				padding: 10px;
+				border-radius: 10px;
+				box-shadow: 0 3px 2px rgba(0, 0, 0, 0.5), inset 0 0 40px rgba(0, 0, 0, 0.25);
+				text-shadow: 0 1px 0 #000, 0 2px 0 #000;
+				margin-bottom: 10px;
+				width: 700px;
+				margin: 0 auto;
+				margin-bottom: 30px;
+				word-wrap: break-word;
+				line-height: 1.2em;
+				overflow: hidden;
+			}
+
+			#output {
+				margin: 0 auto;
+				margin-bottom: 60px;
+				text-align: center;
+				background: url(checkerboard.gif);
+				width: 250px;
+				border-radius: 10px;
+				box-shadow: 0 3px 2px rgba(0, 0, 0, 0.5);
+			}
+
+			#output .inner {
+				display: table-cell;
+				vertical-align: middle;
+				width: 250px;
+				height: 250px;
+			}
+
+			#output img {
+				max-width: 250px;
+				max-height: 250px;
+			}
+
+			.download {	
+				position: fixed;
+				bottom: 0;
+				right: 0;
+				margin: 20px;
+				font-family: 'Lobster', cursive;			
+				background: #FE729D;
+				font-weight: bold;
+				color: #FFF;
+				text-shadow: 0 1px 0 rgba(0, 0, 0, 0.75);
+				padding: 10px;
+				border-radius: 10px;
+				box-shadow: 0 3px 2px rgba(0, 0, 0, 0.5), inset -2px -2px 5px rgba(0, 0, 0, 0.125);
+				display: inline-block;
+			}
+
+			footer {
+				position: fixed;
+				bottom: 0;
+				left: 0;
+				background: rgba(0, 0, 0, 0.5);
+				padding: 10px;
+				color: #FFF;
+				box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
+				border-radius: 0 10px 0 0;
+				font-size: 11px;
+			}
+
+			footer a { 
+				color: #FFF; 
+				font-weight: bold;
+			}
+
+			footer a:hover {
+				text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+			}
+		</style>	
+
+		<script>
+			BlobBuilder = window.MozBlobBuilder || window.WebKitBlobBuilder || window.BlobBuilder;
+			window.URL = window.URL || window.webkitURL;
+
+			var file;
+
+			var dropboxElement, consoleElement, outputElement;
+
+			var worker;
+		
+			function initWorker() {
+				worker = new Worker("worker.js");
+
+				worker.onmessage = function(event) {					
+					var message = event.data;
+
+					if(message.type == "stdout") {
+						consoleElement.innerHTML += message.line + '\n';
+					} else if(message.type == "done") {
+						var imageElement = getImage(message.data);
+
+						outputElement.appendChild(imageElement);					
+
+						//
+						var downloadLinkElement = document.createElement('a');
+
+						downloadLinkElement.className = 'download';
+						downloadLinkElement.download = file.fileName;
+						downloadLinkElement.href = imageElement.src;
+						downloadLinkElement.innerHTML = 'Download';
+
+						document.body.appendChild(downloadLinkElement);
+					}
+				};
+			};
+
+                        function getImage(fileData) {
+				//
+				var blobBuilder = new BlobBuilder();
+
+				blobBuilder.append(fileData);		
+
+				//
+				var blob = blobBuilder.getBlob('image/png');
+
+				//
+				var src = window.URL.createObjectURL(blob);
+				
+				//
+				var imageElement = document.createElement('img');
+
+				imageElement.src = src;
+
+                                return imageElement;
+                        };
+
+			window.onload = function() {
+				//
+				dropboxElement = document.getElementById("dropbox");
+				consoleElement = document.getElementById("console");
+				outputElement = document.getElementById("output").children[0];
+			
+				initWorker();
+
+				//
+				function noopHandler(event) {
+					event.stopPropagation();
+					event.preventDefault();
+				};
+
+				dropboxElement.addEventListener("dragenter", noopHandler, false);
+				dropboxElement.addEventListener("dragexit", noopHandler, false);
+
+				dropboxElement.addEventListener("dragover", function(event) {
+					event.stopPropagation();
+					event.preventDefault();
+
+					event.dataTransfer.dropEffect = 'copy';
+				}, false);
+
+				dropboxElement.addEventListener("drop", function(event) {
+					event.stopPropagation();
+					event.preventDefault();
+
+					var files = event.dataTransfer.files;		
+
+					file = files[0];
+
+					var fileReader = new FileReader();
+
+					/*fileReader.addEventListener('error', function(event) {
+						console.log(event);
+					}, false);
+
+					fileReader.addEventListener('progress', function(event) {
+						console.log(event);
+					}, false);*/
+
+					function onloadend(event) {
+						//
+						var arrayBuffer = event.target.result;
+
+						var data = new Uint8Array(arrayBuffer);
+
+						worker.postMessage({
+							'type' : 'file',
+							'data' : data
+						});
+
+						//
+						consoleElement.innerHTML = '';					
+
+						//
+						worker.postMessage({
+							'type' : 'command',
+							'command' : 'go'							
+						});
+					};
+
+					if(fileReader.addEventListener) {
+						fileReader.addEventListener('loadend', onloadend, false);
+					} else {
+						fileReader.onloadend = onloadend;
+					}
+
+					fileReader.readAsArrayBuffer(file);//readAsBinaryString(file);				
+				}, false);
+			};
+		</script>
+	</head>
+	<body>
+		<header><h1>PNG<span>Crush</span></h1></header>
+
+		<a href="http://github.com/richardassar/pngcrush"><img style="position: fixed; top: 0; right: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/7afbc8b248c68eb468279e8c17986ad46549fb71/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub"></a>
+
+		<div id="dropbox"><span>Drop a PNG here</span></div>
+		<pre id="console">Waiting ...</pre>
+		<div id="output"><div class="inner"></div></div>
+
+		<footer><p>Designed and developed by <a href="http://github.com/richardassar">@richardassar</a> | Powered by <a href="https://github.com/kripken/emscripten">Emscripten</a>, <a href="http://www.libpng.org/pub/png/libpng.html">libpng</a> and <a href="http://zlib.net/">zlib</a></p></footer>
+	</body>
+</html>
