@@ -1,3 +1,8 @@
+var Module = {
+	'noInitialRun' : true,
+	'noFSInit' : true
+};
+
 importScripts('pngcrush.js');
 
 var line = '';
