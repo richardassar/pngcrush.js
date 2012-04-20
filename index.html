@@ -39,16 +39,38 @@
 				width: 320px;
 				height: 200px;
 				margin: 0 auto;
+				margin-bottom: 30px;
+
 				border: solid 1px #CCC;
 				border-bottom: none;
-				background: #FFFCCB;
+
+				background: #FFFF5E;
 				filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FFFCCB', endColorstr='#FFFF5E');
-				background: -webkit-gradient(linear, left top, left bottom, from(#FFFCCB), to(#FFFF5E));
-				background: -moz-linear-gradient(top, #FFFCCB, #FFFF5E);
+				background-image: linear-gradient(bottom, #FFFF5E 0%, #FFFCCB 67%);
+				background-image: -o-linear-gradient(bottom, #FFFF5E 0%, #FFFCCB 67%);
+				background-image: -moz-linear-gradient(bottom, #FFFF5E 0%, #FFFCCB 67%);
+				background-image: -webkit-linear-gradient(bottom, #FFFF5E 0%, #FFFCCB 67%);
+				background-image: -ms-linear-gradient(bottom, #FFFF5E 0%, #FFFCCB 67%);
+				background-image: -webkit-gradient(
+					linear,
+					left bottom,
+					left top,
+					color-stop(0, #FFFF5E),
+					color-stop(0.67, #FFFCCB)
+				);
+
 				border-radius: 10px;
-				box-shadow: 0 3px 2px rgba(0, 0, 0, 0.5), 0px 0px -10px #000, inset 0 0 12px rgba(0, 0, 0, 0.25);
-				margin-bottom: 30px;
+
+				box-shadow: 0 3px 2px rgba(0, 0, 0, 0.5), inset 0 0 12px rgba(0, 0, 0, 0.25);
+
+				transition: opacity 0.25s linear;
+				-moz-transition: opacity 0.25s linear;
+				-webkit-transition: opacity 0.25s linear;
 			}	
+
+			#dropbox.disabled {
+				opacity: 0.25;
+			}
 
 			#dropbox span {
 				display: block;
@@ -150,12 +172,22 @@
 			function initWorker() {
 				worker = new Worker("worker.js");
 
+				worker.onload = function(event) {
+					console.log("onload", event);
+				};
+
 				worker.onmessage = function(event) {					
 					var message = event.data;
 
 					if(message.type == "stdout") {
 						consoleElement.innerHTML += message.line + '\n';
+					} else if(message.type == "start") {
+						consoleElement.innerHTML = '';
 					} else if(message.type == "done") {
+						//
+						consoleElement.innerHTML += "Done!";
+
+						//
 						var imageElement = getImage(message.data);
 
 						outputElement.appendChild(imageElement);					
@@ -169,6 +201,8 @@
 						downloadLinkElement.innerHTML = 'Download';
 
 						document.body.appendChild(downloadLinkElement);
+					} else if (message.type == "ready") {
+						consoleElement.innerHTML = "I'm ready! ..."
 					}
 				};
 			};
@@ -193,7 +227,7 @@
                                 return imageElement;
                         };
 
-			window.onload = function() {
+			document.addEventListener('DOMContentLoaded', function () {
 				//
 				dropboxElement = document.getElementById("dropbox");
 				consoleElement = document.getElementById("console");
@@ -203,7 +237,6 @@
 
 				//
 				function noopHandler(event) {
-					event.stopPropagation();
 					event.preventDefault();
 				};
 
@@ -211,29 +244,23 @@
 				dropboxElement.addEventListener("dragexit", noopHandler, false);
 
 				dropboxElement.addEventListener("dragover", function(event) {
-					event.stopPropagation();
 					event.preventDefault();
 
 					event.dataTransfer.dropEffect = 'copy';
 				}, false);
 
 				dropboxElement.addEventListener("drop", function(event) {
-					event.stopPropagation();
 					event.preventDefault();
+
+					if(dropboxElement.className == "disabled") return;
+
+					dropboxElement.className = "disabled";
 
 					var files = event.dataTransfer.files;		
 
 					file = files[0];
 
 					var fileReader = new FileReader();
-
-					/*fileReader.addEventListener('error', function(event) {
-						console.log(event);
-					}, false);
-
-					fileReader.addEventListener('progress', function(event) {
-						console.log(event);
-					}, false);*/
 
 					function onloadend(event) {
 						//
@@ -245,9 +272,6 @@
 							'type' : 'file',
 							'data' : data
 						});
-
-						//
-						consoleElement.innerHTML = '';					
 
 						//
 						worker.postMessage({
@@ -262,9 +286,9 @@
 						fileReader.onloadend = onloadend;
 					}
 
-					fileReader.readAsArrayBuffer(file);//readAsBinaryString(file);				
+					fileReader.readAsArrayBuffer(file);
 				}, false);
-			};
+			});
 		</script>
 	</head>
 	<body>
@@ -273,9 +297,9 @@
 		<a href="http://github.com/richardassar/pngcrush"><img style="position: fixed; top: 0; right: 0; border: 0;" src="https://a248.e.akamai.net/assets.github.com/img/7afbc8b248c68eb468279e8c17986ad46549fb71/687474703a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub"></a>
 
 		<div id="dropbox"><span>Drop a PNG here</span></div>
-		<pre id="console">Waiting ...</pre>
+		<pre id="console">Loading, please wait ...</pre>
 		<div id="output"><div class="inner"></div></div>
 
-		<footer><p>Designed and developed by <a href="http://github.com/richardassar">@richardassar</a> | Powered by <a href="https://github.com/kripken/emscripten">Emscripten</a>, <a href="http://www.libpng.org/pub/png/libpng.html">libpng</a> and <a href="http://zlib.net/">zlib</a></p></footer>
+		<footer><p>Designed and developed by <a href="http://github.com/richardassar">richardassar</a> | Powered by <a href="https://github.com/kripken/emscripten">Emscripten</a></p></footer>
 	</body>
 </html>
