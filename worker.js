@@ -24,25 +24,25 @@ Module.preRun = function() {
         });
 };
 
-
 function getFileData(fileName) {
 	var data = FS.root.contents[fileName].contents;
 
         return new Uint8Array(data).buffer;
 };
 
-
 onmessage = function(event) {
 	var message = event.data;
 
 	switch(message.type) {
 		case "file":
-			postMessage("FILE");
 			FS.createDataFile('/', 'input.png', message.data, true, false);
+
 			break;
 
 		case "command":
-			if(message.command == "go") {				
+			if(message.command == "go") {
+				postMessage({'type' : 'start'});
+
 				Module.run(['-reduce', '-rem', 'alla', '-rem', 'text', 'input.png', 'output.png']);			
 
 				postMessage({
@@ -54,3 +54,7 @@ onmessage = function(event) {
 			break;
 	};
 };
+
+postMessage({
+	'type' : 'ready'
+});
