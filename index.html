@@ -160,7 +160,7 @@
 		</style>	
 
 		<script>
-			BlobBuilder = window.MozBlobBuilder || window.WebKitBlobBuilder || window.BlobBuilder;
+			window.BlobBuilder = window.MozBlobBuilder || window.WebKitBlobBuilder || window.BlobBuilder;
 			window.URL = window.URL || window.webkitURL;
 
 			var file;
@@ -171,10 +171,6 @@
 		
 			function initWorker() {
 				worker = new Worker("worker.js");
-
-				worker.onload = function(event) {
-					console.log("onload", event);
-				};
 
 				worker.onmessage = function(event) {					
 					var message = event.data;
@@ -196,7 +192,7 @@
 						var downloadLinkElement = document.createElement('a');
 
 						downloadLinkElement.className = 'download';
-						downloadLinkElement.download = file.fileName;
+						downloadLinkElement.download = file.name;
 						downloadLinkElement.href = imageElement.src;
 						downloadLinkElement.innerHTML = 'Download';
 
