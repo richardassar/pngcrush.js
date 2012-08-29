@@ -43,7 +43,7 @@ onmessage = function(event) {
 			if(message.command == "go") {
 				postMessage({'type' : 'start'});
 
-				Module.run(['-reduce', '-rem', 'alla', '-rem', 'text', 'input.png', 'output.png']);			
+				Module.run(['-reduce', '-rem', 'alla', '-rem', 'text', 'input.png', 'output.png']);
 
 				postMessage({
 					'type' : 'done',

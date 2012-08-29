@@ -2,7 +2,7 @@
 <html>
 	<head>
 		<title>PNG Crush</title>
-		
+
 		<style>
 			@import url(http://fonts.googleapis.com/css?family=Lobster);
 
@@ -66,7 +66,7 @@
 				transition: opacity 0.25s linear;
 				-moz-transition: opacity 0.25s linear;
 				-webkit-transition: opacity 0.25s linear;
-			}	
+			}
 
 			#dropbox.disabled {
 				opacity: 0.25;
@@ -107,6 +107,7 @@
 				width: 250px;
 				border-radius: 10px;
 				box-shadow: 0 3px 2px rgba(0, 0, 0, 0.5);
+				overflow: hidden;
 			}
 
 			#output .inner {
@@ -117,16 +118,18 @@
 			}
 
 			#output img {
+				margin: 0 auto;
+				display: block;
 				max-width: 250px;
 				max-height: 250px;
 			}
 
-			.download {	
+			.download {
 				position: fixed;
 				bottom: 0;
 				right: 0;
 				margin: 20px;
-				font-family: 'Lobster', cursive;			
+				font-family: 'Lobster', cursive;
 				background: #FE729D;
 				font-weight: bold;
 				color: #FFF;
@@ -149,15 +152,15 @@
 				font-size: 11px;
 			}
 
-			footer a { 
-				color: #FFF; 
+			footer a {
+				color: #FFF;
 				font-weight: bold;
 			}
 
 			footer a:hover {
 				text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 			}
-		</style>	
+		</style>
 
 		<script>
 			window.BlobBuilder = window.MozBlobBuilder || window.WebKitBlobBuilder || window.BlobBuilder;
@@ -168,11 +171,11 @@
 			var dropboxElement, consoleElement, outputElement;
 
 			var worker;
-		
+
 			function initWorker() {
 				worker = new Worker("worker.js");
 
-				worker.onmessage = function(event) {					
+				worker.onmessage = function(event) {
 					var message = event.data;
 
 					if(message.type == "stdout") {
@@ -186,7 +189,7 @@
 						//
 						var imageElement = getImage(message.data);
 
-						outputElement.appendChild(imageElement);					
+						outputElement.appendChild(imageElement);
 
 						//
 						var downloadLinkElement = document.createElement('a');
@@ -207,14 +210,14 @@
 				//
 				var blobBuilder = new BlobBuilder();
 
-				blobBuilder.append(fileData);		
+				blobBuilder.append(fileData);
 
 				//
 				var blob = blobBuilder.getBlob('image/png');
 
 				//
 				var src = window.URL.createObjectURL(blob);
-				
+
 				//
 				var imageElement = document.createElement('img');
 
@@ -228,7 +231,7 @@
 				dropboxElement = document.getElementById("dropbox");
 				consoleElement = document.getElementById("console");
 				outputElement = document.getElementById("output").children[0];
-			
+
 				initWorker();
 
 				//
@@ -250,7 +253,7 @@
 
 					if(dropboxElement.className == "disabled" || event.dataTransfer.files.length == 0) return; // TODO: Error message
 
-					var files = event.dataTransfer.files;		
+					var files = event.dataTransfer.files;
 
 					file = files[0];
 
@@ -275,7 +278,7 @@
 						//
 						worker.postMessage({
 							'type' : 'command',
-							'command' : 'go'							
+							'command' : 'go'
 						});
 					};
 
@@ -300,17 +303,17 @@
 		<div id="output"><div class="inner"></div></div>
 
 		<footer><p>Designed and developed by <a href="http://github.com/richardassar">richardassar</a> | Powered by <a href="https://github.com/kripken/emscripten">Emscripten</a></p></footer>
-		
+
 		<script type="text/javascript">
 			var _gaq = _gaq || [];
 			_gaq.push(['_setAccount', 'UA-3384663-9']);
 			_gaq.push(['_trackPageview']);
-			
+
 			(function() {
 				var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
 				ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
 				var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
 			})();
-		</script>		
+		</script>
 	</body>
 </html>
