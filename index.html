@@ -208,12 +208,7 @@
 
 			function getImage(fileData) {
 				//
-				var blobBuilder = new BlobBuilder();
-
-				blobBuilder.append(fileData);
-
-				//
-				var blob = blobBuilder.getBlob('image/png');
+				var blob = new Blob([fileData], {type: 'image/png'});
 
 				//
 				var src = window.URL.createObjectURL(blob);
