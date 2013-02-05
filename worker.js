@@ -28,7 +28,7 @@ function getFileData(fileName) {
 	var data = FS.root.contents[fileName].contents;
 
         return new Uint8Array(data).buffer;
-}
+};
 
 onmessage = function(event) {
 	var message = event.data;
